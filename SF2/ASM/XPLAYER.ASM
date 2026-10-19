@@ -3218,10 +3218,10 @@ fire_AW_specialweapon_l
 
 .missile1
 	;;;;s_fire_weapon	x,MISSILE1,.ng
-	jmp		.ok
+	;jmp		.ok							;comment out branch to save bytes
 .dummy
 	;;;;s_fire_weapon	x,AWDUMMY,.ng
-	jmp		.ok
+	;jmp		.ok							;comment out branch to save bytes
 
 .spreadplasma
 	;;;;s_fire_weapon	x,SPREADPLASMA,.ng
