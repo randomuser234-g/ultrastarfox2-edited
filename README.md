@@ -3,8 +3,14 @@ Star Fox 2 source code, modified for ease-of-use and ROMHacking.
 
 -edited from the original
 -Rapidfire ported from StarFox 1 on SNES, luckily variables were unused so just removing some things to free up space was needed
+
 -Hold the fire button to fire 3 shots at a time. You can still charge a shot, so this is very powerful!
--Known issues, this behaviour is not programmed for walker mode, so shots aren't more powerful and they don't aim automatically. Can also fire while transforming
+
+-Known issues 
+
+the implementation has no changes for walker mode, so shots aren't more powerful and they don't aim with the cursor, in those cases, press the fire button.
+
+Can also fire while transforming.
 
 back to original description
 
