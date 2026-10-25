@@ -2523,24 +2523,33 @@ tp_checkshoot_l
 
 	toheap		y,x
 
+	TESTJOYPAD	fire,pcont	;changed ptrig to pcont
+	bne		.rapidfire	;if pressed button, do rapidfire
+	jmp		robot_exit_rfp	;otherwise end
+
+.rapidfire		;added rapid fire funciton from StarFox 1, one part got changed due to space concerns though
+	s_decbne_var		B,firedelay,robot_exit_rfp
+	s_set_var		B,firedelay,#player_firespeed
+	s_beqdec_var		B,firecnt,robot_exit_rfp
+
 	sp_jmp_playertype	x,ARWING,ARWING_WEAPON
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 ROBOT_WEAPON
 
-.weapon_Y	TESTJOYPAD	fire,ptrig	;Y,ptrig
-	rlbeq		.exit_rfp
+;.weapon_Y	;TESTJOYPAD	fire,ptrig	;Y,ptrig
+;	rlbeq		robot_exit_rfp
 
 ;************
 	lda	demomode
-	rlbne	.exit_rfp
+	rlbne	robot_exit_rfp
 ;************
 
 ;ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ;³    PLASMA    ³
 ;ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-	km_jmpgameflag		freeze,.exit_rfp
+	km_jmpgameflag		freeze,robot_exit_rfp
 
 	pl_ldy_viewblk	x
 
@@ -2564,9 +2573,10 @@ ROBOT_WEAPON
 	s_weapon_pos	#0,#0,z1
 
 	s_weapon_rot	x1,#0
-	s_fire_weapon	x,Pplasma,.exit_rfp
+	s_fire_weapon	x,Pplasma,robot_exit_rfp
 
-.exit_rfp	plp
+robot_exit_rfp		;.exit_rfp
+	plp
 	ply
 	plx
 	rtl
@@ -2579,9 +2589,8 @@ ARWING_WEAPON
 ;----------------------------------------------------------------------------
 .weapon_Y
 
-	TESTJOYPAD	fire,ptrig
-	beq		.noadd
-
+	;removed y check, moved elsewhere
+	;changed beq
 	lda	exal_weaponstatus,y
 	cmp	#40h
 	bpl	.noadd
@@ -2616,7 +2625,8 @@ ARWING_WEAPON
 	s_dec_alvar	B,y,exal_weaponstatus	;,#0f0h
 
 
-.weapon_end	plp
+.weapon_end
+	plp
 	ply
 	plx
 	rtl
@@ -2948,14 +2958,6 @@ fire_powerd_srou_l	; -- fire powerd laser
 	testjoypad	fire,pcont	;holding the fire button?
 	beq		.notrig		;if not, don't charge
 
-.rapidfire		;added rapid fire funciton from StarFox 1, one part got changed due to space concerns though
-;known bugs include doesn't have stronger lasers and proper aim with walker mode, capable of firing during transform
-	s_decbne_var		B,firedelay,.skiprapid
-	s_set_var		B,firedelay,#player_firespeed
-	s_beqdec_var		B,firecnt,.skiprapid
-	jsr	arwing_fire_laser1	; fire lasers
-.skiprapid
-
 	testjoypad	fire,ptrig	
 	bne		.notrig		;causes minor issue when removed, charge is counted as soon as button pressed, can mash button to fill charge
 
@@ -2967,7 +2969,7 @@ fire_powerd_srou_l	; -- fire powerd laser
 
 ;************
 .notrig
-	s_set_var		B,firedelay,#player_firespeed	;added, do note these variables were already there, only unused
+	s_set_var		B,firedelay,#1	;added, do note these variables were already there, only unused
 	s_set_var		B,firecnt,#3		;added
 	lda	exal_weap_powerflag,y
 	and	#~exal_weap_powerflag_fired
