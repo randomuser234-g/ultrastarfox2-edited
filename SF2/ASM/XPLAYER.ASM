@@ -2522,7 +2522,7 @@ tp_checkshoot_l
 ;-------------------------------------------------------------------
 
 	toheap		y,x
-
+;added rapid fire funciton from StarFox 1, put it between both weapons so arwing AND walker fire, one part got changed due to space concerns though
 	TESTJOYPAD	fire,pcont	;Y,ptrig
 	beq		.nofire
 	s_decbne_var		B,firedelay,.nofire
