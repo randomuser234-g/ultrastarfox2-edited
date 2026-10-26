@@ -2523,13 +2523,24 @@ tp_checkshoot_l
 
 	toheap		y,x
 
+	TESTJOYPAD	fire,pcont	;Y,ptrig
+	beq		.nofire
+	s_decbne_var		B,firedelay,.nofire
+	s_set_var		B,firedelay,#player_firespeed
+	s_jmp_varnotzero	B,firecnt,.fire
+.nofire
+	sp_jmp_playertype	x,ARWING,arwing_nobtn	
+	bra			robot_exit_rfp
+.fire
+	s_dec_var		B,firecnt
 	sp_jmp_playertype	x,ARWING,ARWING_WEAPON
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 ROBOT_WEAPON
 
-.weapon_Y	TESTJOYPAD	fire,ptrig	;Y,ptrig
-	rlbeq		.exit_rfp
+.weapon_Y	
+;	TESTJOYPAD	fire,ptrig	;Y,ptrig
+;	rlbeq		.exit_rfp
 
 ;************
 	lda	demomode
@@ -2566,7 +2577,9 @@ ROBOT_WEAPON
 	s_weapon_rot	x1,#0
 	s_fire_weapon	x,Pplasma,.exit_rfp
 
-.exit_rfp	plp
+.exit_rfp
+robot_exit_rfp
+	plp
 	ply
 	plx
 	rtl
@@ -2579,8 +2592,8 @@ ARWING_WEAPON
 ;----------------------------------------------------------------------------
 .weapon_Y
 
-	TESTJOYPAD	fire,ptrig
-	beq		.noadd
+	;TESTJOYPAD	fire,pcont	;ptrig to pcont
+	;beq		.noadd
 
 	lda	exal_weaponstatus,y
 	cmp	#40h
@@ -2590,7 +2603,7 @@ ARWING_WEAPON
 	sta	exal_weaponstatus,y
 
 .noadd
-
+arwing_nobtn
 ; fire
 
 	lda	exal_weaponstatus,y
@@ -2946,15 +2959,7 @@ fire_powerd_srou_l	; -- fire powerd laser
 ;************
 
 	testjoypad	fire,pcont	;holding the fire button?
-	beq		.notrig		;if not, don't charge
-
-.rapidfire		;added rapid fire funciton from StarFox 1, one part got changed due to space concerns though
-;known bugs include doesn't have stronger lasers and proper aim with walker mode, capable of firing during transform
-	s_decbne_var		B,firedelay,.skiprapid
-	s_set_var		B,firedelay,#player_firespeed
-	s_beqdec_var		B,firecnt,.skiprapid
-	jsr	arwing_fire_laser1	; fire lasers
-.skiprapid
+	beq		.resetfirecnt		;if not, don't charge
 
 	testjoypad	fire,ptrig	
 	bne		.notrig		;causes minor issue when removed, charge is counted as soon as button pressed, can mash button to fill charge
@@ -2966,9 +2971,10 @@ fire_powerd_srou_l	; -- fire powerd laser
 	bra	.cont
 
 ;************
+.resetfirecnt		;only when not holding is firecnt reset
+	s_set_var		B,firedelay,#1	;added, do note these variables were already there, only unused
+	s_set_var		B,firecnt,#3
 .notrig
-	s_set_var		B,firedelay,#player_firespeed	;added, do note these variables were already there, only unused
-	s_set_var		B,firecnt,#3		;added
 	lda	exal_weap_powerflag,y
 	and	#~exal_weap_powerflag_fired
 	sta	exal_weap_powerflag,y
@@ -2986,8 +2992,7 @@ fire_powerd_srou_l	; -- fire powerd laser
 	testjoypad	fire,pcont	
 ;	rlbne		.nocont		;removed not continuing if button is held
 
-	beq		.fire		;if not held fire
-	bra		.nocont		;otherwise no continue
+	bne		.nocont		;if not held fire
 
 .fire
 
